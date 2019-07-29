@@ -7,11 +7,19 @@ class GatewayParser extends DeviceParser {
     }
     
     getAccessoriesParserInfo() {
-        return {
+        var parsersInfo = {
             'Gateway_Lightbulb': GatewayLightbulbParser,
             'Gateway_LightSensor': GatewayLightSensorParser,
             'Gateway_Switch_JoinPermission': GatewaySwitchJoinPermissionParser
+        };
+        this.platform._gatewayMelodyButtons = {}; 
+        var melodies = this.platform.ConfigUtil.getMelodies();
+        for(var item in melodies){
+            var accessoryID = 'Gateway_Switch_Melody_'+item;
+            parsersInfo[accessoryID] = GatewayMelodySwitchParser;
+            this.platform._gatewayMelodyButtons[accessoryID] = melodies[item];
         }
+        return parsersInfo;
     }
 }
 GatewayParser.modelName = ['gateway', 'gateway.v3'];
@@ -579,4 +587,26 @@ class GatewaySwitchJoinPermissionParser extends AccessoryParser {
             // return defaultValue;
         // }
     // }
+}
+
+class GatewayParser extends DeviceParser {
+    constructor(platform) {
+        super(platform);
+    }
+    
+    getAccessoriesParserInfo() {
+        var parsersInfo = {
+            'Gateway_Lightbulb': GatewayLightbulbParser,
+            'Gateway_LightSensor': GatewayLightSensorParser,
+            'Gateway_Switch_JoinPermission': GatewaySwitchJoinPermissionParser
+        };
+        this.platform._gatewayMelodyButtons = {}; 
+        var melodies = this.platform.ConfigUtil.getMelodies();
+        for(var item in melodies){
+            var accessoryID = 'Gateway_Switch_Melody_'+item;
+            parsersInfo[accessoryID] = GatewayMelodySwitchParser;
+            this.platform._gatewayMelodyButtons[accessoryID] = melodies[item];
+        }
+        return parsersInfo;
+    }
 }
