@@ -1,5 +1,6 @@
 const DeviceParser = require('./DeviceParser');
 const AccessoryParser = require('./AccessoryParser');
+const util = require('util');
 
 class GatewayParser extends DeviceParser {
     constructor(platform) {
@@ -7,11 +8,19 @@ class GatewayParser extends DeviceParser {
     }
     
     getAccessoriesParserInfo() {
-        return {
+        var parsersInfo = {
             'Gateway_Lightbulb': GatewayLightbulbParser,
             'Gateway_LightSensor': GatewayLightSensorParser,
             'Gateway_Switch_JoinPermission': GatewaySwitchJoinPermissionParser
+        };
+        this.platform._gatewayMelodyButtons = {}; 
+        var melodies = this.platform.ConfigUtil.getMelodies();
+        for(var item in melodies){
+            var accessoryID = 'Gateway_Switch_Melody_'+item;
+            parsersInfo[accessoryID] = GatewayMelodySwitchParser;
+            this.platform._gatewayMelodyButtons[accessoryID] = melodies[item];
         }
+        return parsersInfo;
     }
 }
 GatewayParser.modelName = ['gateway', 'gateway.v3'];
@@ -579,4 +588,76 @@ class GatewaySwitchJoinPermissionParser extends AccessoryParser {
             // return defaultValue;
         // }
     // }
+}
+
+class GatewayMelodySwitchParser extends AccessoryParser {
+    constructor(platform, accessoryType) {
+        super(platform, accessoryType)
+        this.melodyButtonTimeout = {};
+    }
+    
+    getAccessoryCategory(deviceSid) {
+        return this.Accessory.Categories.SWITCH;
+    }
+    
+    getAccessoryInformation(deviceSid) {
+        return {
+            'Manufacturer': 'Aqara',
+            'Model': 'Gateway',
+            'SerialNumber': deviceSid
+        };
+    }
+
+    getServices(jsonObj, accessoryName) {
+        var that = this;
+        var result = [];
+        
+        var melodyInfo = that.platform._gatewayMelodyButtons[that.accessoryType];
+        var service = new that.Service.Switch(melodyInfo.name ? melodyInfo.name : accessoryName);
+        service.getCharacteristic(that.Characteristic.On);
+        result.push(service);
+        
+        return result;
+    }
+    
+    parserAccessories(jsonObj) {
+        var that = this;
+        var deviceSid = jsonObj['sid'];
+        var uuid = that.getAccessoryUUID(deviceSid);
+        var accessory = that.platform.AccessoryUtil.getByUUID(uuid);
+        if(accessory) {
+            var service = accessory.getService(that.Service.Switch);
+            var onCharacteristic = service.getCharacteristic(that.Characteristic.On);
+            
+            if(onCharacteristic.listeners('set').length == 0) {
+                onCharacteristic.on("set", function(value, callback) {
+                    if(value) {
+                        var melodyInfo = that.platform._gatewayMelodyButtons[that.accessoryType];
+                        if(melodyInfo) {
+                            var toneId = melodyInfo.id;
+                            var volume = melodyInfo.volume;
+                            var gateway = melodyInfo.gateway || deviceSid;
+                            clearTimeout(that.melodyButtonTimeout[that.accessoryType]);
+                            var command = '{"cmd":"write","model":"gateway","sid":"' + gateway + '","data":"{\\"mid\\":' + toneId + ',\\"vol\\":' + volume + ', \\"key\\": \\"${key}\\"}"}';
+                            that.platform.sendWriteCommand(deviceSid, command).then(result => {
+                                that.callback2HB(deviceSid, this, callback, null);
+                                if(value) {
+                                    that.melodyButtonTimeout[that.accessoryType] = setTimeout(() => {
+                                        onCharacteristic.updateValue(false);
+                                    }, 1000);
+                                }
+                            }).catch(function(err) {
+                                that.platform.log.error(err);
+                                that.callback2HB(deviceSid, this, callback, err);
+                            });
+                        }
+                        else{
+                            that.platform.log.error("No melodies found for "+that.accessoryType);
+                        }
+                    }
+                });
+            }
+        }
+    }
+   
 }
