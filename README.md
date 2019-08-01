@@ -857,7 +857,7 @@ about write key, send the `${key}` is okay, this plugin will automatically calcu
 New **melodies** section allows to create virtual buttons for playing system/user-recorded melodies: 
 
 Volume can be specified by 'volume' parameter, and 'id' is identifier of the internal or user-uploaded melody. 'id' can be: 
-
+```
 Alarms 
  0 - Police car 1
  1 - Police car 2
@@ -884,7 +884,7 @@ Alarm clock
  27 - MusicBox
  28 - Orange
  29 - Thinker
-
+```
 for gateway's default melodies
  
 Custom melodies (uploaded by the Mi Home app) starting from 10001
