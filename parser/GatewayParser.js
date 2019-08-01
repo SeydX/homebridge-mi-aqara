@@ -1,5 +1,6 @@
 const DeviceParser = require('./DeviceParser');
 const AccessoryParser = require('./AccessoryParser');
+const util = require('util');
 
 class GatewayParser extends DeviceParser {
     constructor(platform) {
