@@ -853,6 +853,98 @@ plugin will accept these topic:
 about write key, send the `${key}` is okay, this plugin will automatically calculate the key value, for example:   
 `{"cmd": "write", "model": "ctrl_neutral2", "sid": "158d00014a1bcd", "params": [{"channel_0": "off"}], "key": "${key}"}`
     
+### play gateway melodies configuration
+New **melodies** section allows to create virtual buttons for playing system/user-recorded melodies: 
+
+Volume can be specified by 'volume' parameter, and 'id' is identifier of the internal or user-uploaded melody. 'id' can be: 
+
+Alarms 
+ 0 - Police car 1
+ 1 - Police car 2
+ 2 - Accident
+ 3 - Countdown
+ 4 - Ghost
+ 5 - Sniper rifle
+ 6 - Battle
+ 7 - Air raid
+ 8 - Bark
+Doorbells 
+ 10 - Doorbell
+ 11 - Knock at a door
+ 12 - Amuse
+ 13 - Alarm clock
+Alarm clock 
+ 20 - MiMix
+ 21 - Enthusiastic
+ 22 - GuitarClassic
+ 23 - IceWorldPiano
+ 24 - LeisureTime
+ 25 - ChildHood
+ 26 - MorningStreamLiet
+ 27 - MusicBox
+ 28 - Orange
+ 29 - Thinker
+
+for gateway's default melodies
+ 
+Custom melodies (uploaded by the Mi Home app) starting from 10001
+
+10000 - stops any playing melodies
+
+Optionally, if you have several gateways you can specify 'gateway' parameter for each melody. 
+
+To config your melody-buttons add this to your config:
+
+```
+{
+    "platforms": [{
+        "platform": "MiAqaraPlatform",
+        "gateways": {
+            "6409802da3b3": "02i44k56zrgg578b",
+            "f0b4299a5b2b": "2F92E7DA90C66B86",
+            "f0b4299a77dd": "syu3oasva3uqd5qd"
+        },
+        "melodies":
+        [
+          { 
+            "id": 0,
+            "volume": 5,
+            "name": "Police car 1"
+          },
+          { 
+            "id":10001,
+            "volume":3,
+            "name":"Button to play melody 2",
+            "gateway":"6409802da3b3"
+          },
+          { 
+            "id":10000,
+            "volume":1,
+            "name":"stop playing",
+            "gateway":"6409802da3b3"
+          }
+
+        ],
+        "defaultValue": {
+            "158d0001000001": {
+                "ContactSensor_ContactSensor": {
+                    "name": "entrance door"
+                }
+            },
+            "158d0001000002": {
+                "MotionSensor2_MotionSensor": {
+                    "name": "study room motion sensor"
+                },
+                "MotionSensor2_LightSensor": {
+                    "name": "study room light sensor"
+                }
+            }
+        }
+    }]
+}
+```
+
+
 ## Some explanation
 Button/Button2 StatelessProgrammableSwitch support SinglePress, DoublePress, LongPress.   
 SingleButton86/DuplexButton86(Left, Right, Both) StatelessProgrammableSwitch only support SinglePress.   
@@ -867,6 +959,8 @@ mv cachedAccessories cachedAccessories_\`date '+%Y%m%d_%H%M%S'\`.bak
 echo [] > cachedAccessories   
 
 ## Version Logs
+### 0.9.0 (2019-08-01)
+1. add gateway melodies play feature. 
 ### 0.8.1 (2019-04-28)
 1. add fakegato-history. 
 ### 0.8.0 (2018-11-04)
