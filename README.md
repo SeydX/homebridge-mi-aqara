@@ -960,7 +960,7 @@ echo [] > cachedAccessories
 
 ## Version Logs
 ### 0.9.0 (2019-08-01)
-1. add gateway melodies play feature. 
+1. add play gateway melodies feature. 
 ### 0.8.1 (2019-04-28)
 1. add fakegato-history. 
 ### 0.8.0 (2018-11-04)
